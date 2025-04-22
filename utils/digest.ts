@@ -6,7 +6,7 @@ import OpenAI from 'openai';
 import cron from 'node-cron';
 
     const openai = new OpenAI({
-      apiKey: process.env.OPENAI_API_KEY,
+        apiKey: process.env.OPENAI_API_KEY,
     });
 
     const KEYWORDS = ['緊急', 'トラブル', '質問'];
