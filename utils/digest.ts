@@ -10,7 +10,7 @@ import cron from 'node-cron';
     });
 
     const KEYWORDS = ['緊急', 'トラブル', '質問'];
-    const MESSAGE_LOG = new Map<string, { content: string; author: string; timestamp: number }[]>();
+    export const MESSAGE_LOG = new Map<string, { content: string; author: string; timestamp: number }[]>();
 
 export function setupDigestBot(client: ExtendedClient) {
     client.on('messageCreate', async (message) => {
