@@ -15,8 +15,8 @@ const { OPENAI_API_KEY } = JSON.parse(
 const openai = new OpenAI({
     apiKey: OPENAI_API_KEY,
 });
-    const KEYWORDS = ['緊急', 'トラブル', '質問'];
-    export const MESSAGE_LOG = new Map<string, { content: string; author: string; timestamp: number }[]>();
+const KEYWORDS = ['緊急', 'トラブル', '質問'];
+export const MESSAGE_LOG = new Map<string, { content: string; author: string; timestamp: number }[]>();
 
 export function setupDigestBot(client: ExtendedClient) {
     client.on('messageCreate', async (message) => {
