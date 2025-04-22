@@ -3,12 +3,18 @@
 
 import { ExtendedClient } from '../index';
 import OpenAI from 'openai';
+import fs from 'fs';
+import path from 'path';
 import cron from 'node-cron';
 
-    const openai = new OpenAI({
-        apiKey: process.env.OPENAI_API_KEY,
-    });
+const configPath = path.resolve(process.cwd(), 'data', 'config.json');
+const { OPENAI_API_KEY } = JSON.parse(
+    fs.readFileSync(configPath, 'utf-8')
+);
 
+const openai = new OpenAI({
+    apiKey: OPENAI_API_KEY,
+});
     const KEYWORDS = ['緊急', 'トラブル', '質問'];
     export const MESSAGE_LOG = new Map<string, { content: string; author: string; timestamp: number }[]>();
 

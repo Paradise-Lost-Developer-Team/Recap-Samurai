@@ -3,10 +3,16 @@
 
 import { ChatInputCommandInteraction, SlashCommandBuilder } from 'discord.js';
 import OpenAI from 'openai';
-import { ExtendedClient } from '../../index'; // クライアントの型をインポート
+import fs from 'fs';
+import path from 'path';
+
+const configPath = path.resolve(process.cwd(), 'data', 'config.json');
+const { OPENAI_API_KEY } = JSON.parse(
+    fs.readFileSync(configPath, 'utf-8')
+);
 
 const openai = new OpenAI({
-    apiKey: process.env.OPENAI_API_KEY,
+    apiKey: OPENAI_API_KEY,
 });
 
 // メッセージログは外部からインポートされると仮定
