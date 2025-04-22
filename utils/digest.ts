@@ -37,7 +37,7 @@ export function setupDigestBot(client: ExtendedClient) {
 
         const summaryText = messages.map((m) => `${m.author}: ${m.content}`).join('\n');
         const completion = await openai.chat.completions.create({
-            model: 'gpt-3.5-turbo',
+            model: 'gpt-4.1',
             messages: [
             {
                 role: 'system',
