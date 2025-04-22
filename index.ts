@@ -75,6 +75,7 @@ client.once("ready", async () => {
                 logError('statusUpdateError', error instanceof Error ? error : new Error(String(error)));
             }
         }, 30000);
+        console.log("起動完了");
     } catch (error) {
         console.error("Bot起動エラー:", error);
         logError('botStartupError', error instanceof Error ? error : new Error(String(error)));
