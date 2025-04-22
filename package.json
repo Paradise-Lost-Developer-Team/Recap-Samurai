@@ -1,0 +1,10 @@
+{
+  "dependencies": {
+    "@sentry/node": "^9.13.0",
+    "axios": "^1.8.4",
+    "discord.js": "^14.18.0",
+    "node-cron": "^3.0.3",
+    "openai": "^4.95.1",
+    "typescript": "^5.8.3"
+  }
+}
