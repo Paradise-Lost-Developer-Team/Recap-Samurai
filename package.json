@@ -16,5 +16,8 @@
     "lint:fix": "eslint . --ext .ts --fix",
     "prettier": "prettier --write .",
     "prettier:check": "prettier --check ."
+  },
+  "devDependencies": {
+    "@types/node-cron": "^3.0.11"
   }
 }
