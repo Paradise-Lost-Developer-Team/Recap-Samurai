@@ -5,6 +5,8 @@ import { ChatInputCommandInteraction, SlashCommandBuilder } from 'discord.js';
 import OpenAI from 'openai';
 import fs from 'fs';
 import path from 'path';
+// メッセージログは外部からインポートされると仮定
+import { MESSAGE_LOG } from '../../utils/digest';
 
 const configPath = path.resolve(process.cwd(), 'data', 'config.json');
 const { OPENAI_API_KEY } = JSON.parse(
@@ -15,16 +17,14 @@ const openai = new OpenAI({
     apiKey: OPENAI_API_KEY,
 });
 
-// メッセージログは外部からインポートされると仮定
-import { MESSAGE_LOG } from '../../utils/digest';
 
 export const data = new SlashCommandBuilder()
     .setName('digest')
     .setDescription('今週のメッセージを要約して表示します');
 
 export async function execute(interaction: ChatInputCommandInteraction) {
-    const guildId = interaction.guildId;
-    const messages = MESSAGE_LOG.get(guildId!);
+    const guildId = interaction.guildId!;
+    const messages = MESSAGE_LOG.get(guildId);
 
     if (!messages || messages.length === 0) {
         await interaction.reply('今週のメッセージログが見つかりませんでした。');
