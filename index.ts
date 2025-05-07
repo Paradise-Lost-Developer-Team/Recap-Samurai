@@ -6,6 +6,7 @@ import * as path from "path";
 import { logError } from "./utils/errorLogger";
 import './utils/patreonIntegration'; // Patreon連携モジュールをインポート
 import { initSentry } from './utils/sentry';
+import { setupDigestBot } from './utils/digest';
 
 // アプリケーション起動の最初にSentryを初期化
 initSentry();
@@ -19,7 +20,11 @@ if (!fs.existsSync(DATA_DIR)) {
 
 const CONFIG_PATH = path.resolve(process.cwd(), 'data', 'config.json');
 const CONFIG = JSON.parse(fs.readFileSync(CONFIG_PATH, 'utf8'));
-const { TOKEN } = CONFIG;
+const { TOKEN, GEMINI_SERVICE_ACCOUNT_PATH } = CONFIG;
+// Google Application Default Credentials が読めるようにServiceAccountファイルパスを環境変数に設定
+if (GEMINI_SERVICE_ACCOUNT_PATH) {
+  process.env.GOOGLE_APPLICATION_CREDENTIALS = path.join(DATA_DIR, GEMINI_SERVICE_ACCOUNT_PATH);
+}
 
 export interface ExtendedClient extends Client {
     commands: Collection<string, any>;
@@ -27,6 +32,9 @@ export interface ExtendedClient extends Client {
 
 export const client = new Client({ intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMessages, GatewayIntentBits.MessageContent, GatewayIntentBits.GuildVoiceStates] }) as ExtendedClient;
 client.commands = new Collection(); // コマンド用の Collection を作成
+
+// メッセージログ収集と週次ダイジェストのセットアップ
+setupDigestBot(client);
 
 const rest = new REST({ version: '9' }).setToken(TOKEN);
 
