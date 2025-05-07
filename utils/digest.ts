@@ -1,5 +1,5 @@
 // 要約侍 - digest.ts
-// 機能: 週次ダイジェスト & キーワードアラート + 永続化
+// 機能: 週次ダイジェスト & キーワードアラート
 
 import { ExtendedClient } from '../index';
 import fs from 'fs';
