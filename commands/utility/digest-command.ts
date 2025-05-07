@@ -60,7 +60,7 @@ export async function execute(interaction: ChatInputCommandInteraction) {
             let lastId: string | undefined;
             const allMessages: any[] = [];
             for (let i = 0; i < 10; i++) {
-                const opts: FetchMessagesOptions = { limit: 20 };
+                const opts: FetchMessagesOptions = { limit: 100 };
                 if (lastId) opts.before = lastId;
                 const fetched = await (channel as TextChannel).messages.fetch(opts);
                 if (fetched.size === 0) break;
