@@ -1,7 +1,7 @@
 // digest-command.ts
 // スラッシュコマンド: /digest - 手動で週次ダイジェストを出力
 
-import { ChatInputCommandInteraction, SlashCommandBuilder, Message, TextChannel, Collection, MessageFlags, PermissionFlagsBits } from 'discord.js';
+import { ChatInputCommandInteraction, SlashCommandBuilder, Message, TextChannel, Collection, MessageFlags, PermissionFlagsBits, DiscordAPIError } from 'discord.js';
 import type { FetchMessagesOptions } from 'discord.js';
 import fs from 'fs';
 import path from 'path';
@@ -117,7 +117,7 @@ ${summaryText}`;
     } catch (error: any) {
         console.error('digest command execution error:', error);
         // Missing Access (権限不足) をユーザーに通知
-        if (typeof error.code === 'number' && error.code === 50001) {
+        if (error instanceof DiscordAPIError && error.code === 50001) {
             try {
                 await interaction.followUp({ content: 'エラー: Bot に必要な権限がありません。チャンネル参照とメッセージ履歴閲覧権限を付与してください。', flags: MessageFlags.Ephemeral });
             } catch { /* suppress */ }
