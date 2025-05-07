@@ -44,6 +44,11 @@ export async function execute(interaction: ChatInputCommandInteraction) {
                 await interaction.followUp({ content: 'このコマンドはテキストチャンネルでのみ使用可能です。', flags: MessageFlags.Ephemeral });
                 return;
             }
+            // サーバー内のテキストチャンネルであることを保証
+            if (!(channel instanceof TextChannel)) {
+                await interaction.followUp({ content: 'このコマンドはサーバーのテキストチャンネルでのみ使用可能です。', flags: MessageFlags.Ephemeral });
+                return;
+            }
             const textChannel = channel as TextChannel;
             // Botのチャンネル参照権限とメッセージ履歴閲覧権限をチェック
             const botMember = interaction.guild?.members.me;
