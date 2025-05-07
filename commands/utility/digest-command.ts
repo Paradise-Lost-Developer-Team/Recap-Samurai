@@ -116,7 +116,14 @@ ${summaryText}`;
         }
     } catch (error: any) {
         console.error('digest command execution error:', error);
-        // エラー時は followUp
+        // Missing Access (権限不足) をユーザーに通知
+        if (typeof error.code === 'number' && error.code === 50001) {
+            try {
+                await interaction.followUp({ content: 'エラー: Bot に必要な権限がありません。チャンネル参照とメッセージ履歴閲覧権限を付与してください。', flags: MessageFlags.Ephemeral });
+            } catch { /* suppress */ }
+            return;
+        }
+        // その他エラー時は followUp
         try {
             await interaction.followUp({ content: 'コマンド実行中にエラーが発生しました。', flags: MessageFlags.Ephemeral });
         } catch { /* suppress */ }
