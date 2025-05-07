@@ -1,7 +1,7 @@
 // digest-command.ts
 // スラッシュコマンド: /digest - 手動で週次ダイジェストを出力
 
-import { ChatInputCommandInteraction, SlashCommandBuilder, Message, TextChannel, Collection, MessageFlags } from 'discord.js';
+import { ChatInputCommandInteraction, SlashCommandBuilder, Message, TextChannel, Collection, MessageFlags, PermissionFlagsBits } from 'discord.js';
 import type { FetchMessagesOptions } from 'discord.js';
 import fs from 'fs';
 import path from 'path';
@@ -42,6 +42,13 @@ export async function execute(interaction: ChatInputCommandInteraction) {
             const channel = interaction.channel;
             if (!channel || !channel.isTextBased?.() || !('messages' in channel)) {
                 await interaction.followUp({ content: 'このコマンドはテキストチャンネルでのみ使用可能です。', flags: MessageFlags.Ephemeral });
+                return;
+            }
+            const textChannel = channel as TextChannel;
+            // Botのチャンネル参照権限とメッセージ履歴閲覧権限をチェック
+            const botMember = interaction.guild?.members.me;
+            if (!botMember || !textChannel.permissionsFor(botMember).has(PermissionFlagsBits.ViewChannel | PermissionFlagsBits.ReadMessageHistory)) {
+                await interaction.followUp({ content: 'エラー: Botにこのチャンネルの参照とメッセージ履歴閲覧権限がありません。管理者に権限を付与してください。', flags: MessageFlags.Ephemeral });
                 return;
             }
             const oneWeekAgo = Date.now() - 7 * 24 * 60 * 60 * 1000;
