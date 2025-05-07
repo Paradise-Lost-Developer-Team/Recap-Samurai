@@ -5,21 +5,24 @@
     import fs from 'fs';
     import path from 'path';
     import cron from 'node-cron';
-    import { PredictionServiceClient } from '@google-cloud/aiplatform';
+    import { GoogleGenAI, HarmCategory, SafetySetting } from '@google/genai';
             
     const dataDir = path.resolve(process.cwd(), 'data');
     const configPath = path.join(dataDir, 'config.json');
         
-    // config読み込み (Gemini設定)
-    const { GEMINI_SERVICE_ACCOUNT_PATH, GEMINI_PROJECT_ID, GEMINI_LOCATION, GEMINI_MODEL_ID, ALTERNATE_GEMINI_MODEL_ID, ALTERNATE_MODEL_UNTIL } = JSON.parse(
+    // config読み込み (Gemini 設定)
+    const { GEMINI_API_KEY, GEMINI_PROJECT_ID, GEMINI_LOCATION, GEMINI_MODEL_ID, ALTERNATE_GEMINI_MODEL_ID, ALTERNATE_MODEL_UNTIL } = JSON.parse(
         fs.readFileSync(configPath, 'utf-8')
     );
-    // Vertex AI PaLMクライアント初期化 (keyFilenameは設定があれば使用)
-    const clientOptions: any = {};
-    if (GEMINI_SERVICE_ACCOUNT_PATH) {
-      clientOptions.keyFilename = path.join(dataDir, GEMINI_SERVICE_ACCOUNT_PATH);
-    }
-    const aiClient = new PredictionServiceClient(clientOptions);
+    // GoogleGenAI クライアント初期化
+    const ai = new GoogleGenAI({
+        vertexai: true,
+        project: GEMINI_PROJECT_ID,
+        location: GEMINI_LOCATION,
+        apiKey: GEMINI_API_KEY,
+    });
+    // prompt テンプレート読み込み
+    const promptTemplate = fs.readFileSync(path.resolve(process.cwd(), 'utils', 'prompt_digest.txt'), 'utf-8');
 
     const KEYWORDS = ['緊急', 'トラブル', '質問'];
     export const MESSAGE_LOG = new Map<string, { content: string; author: string; timestamp: number }[]>();
@@ -56,19 +59,37 @@
                 if (!channel || !channel.isTextBased?.()) continue;
 
                 const summaryText = messages.map((m) => `${m.author}: ${m.content}`).join('\n');
-
-                // モデルIDを切り替え
-                const useModel = (new Date() < new Date(ALTERNATE_MODEL_UNTIL)) ? ALTERNATE_GEMINI_MODEL_ID : GEMINI_MODEL_ID;
-                const modelName = `projects/${GEMINI_PROJECT_ID}/locations/${GEMINI_LOCATION}/publishers/google/models/${useModel}`;
-                const request: any = {
-                    endpoint: modelName,
-                    instances: [{ content: summaryText }],
-                    parameters: { temperature: 0.2, maxOutputTokens: 300 },
+                // プロンプトと結合
+                const promptInput = `${promptTemplate}\n\n${summaryText}`;
+                // 生成設定
+                const generationConfig = {
+                    maxOutputTokens: 8192,
+                    temperature: 1,
+                    topP: 0.95,
+                    responseModalities: ['TEXT'],
+                    safetySettings: [
+                        { category: HarmCategory.HARM_CATEGORY_HATE_SPEECH, threshold: 'OFF' },
+                        { category: HarmCategory.HARM_CATEGORY_DANGEROUS_CONTENT, threshold: 'OFF' },
+                        { category: HarmCategory.HARM_CATEGORY_SEXUALLY_EXPLICIT, threshold: 'OFF' },
+                        { category: HarmCategory.HARM_CATEGORY_HARASSMENT, threshold: 'OFF' },
+                    ] as SafetySetting[],
                 };
-                const predictResArr = (await aiClient.predict(request)) as any[];
-                const response = predictResArr[0];
-                const digest = response.predictions?.[0]?.content ?? '要約に失敗しました';
-                await channel.send(`📝 **要約侍による週次ダイジェスト**\n${digest}`);
+                // モデル選択
+                const isAlternate = new Date() < new Date(ALTERNATE_MODEL_UNTIL);
+                const model = isAlternate ? ALTERNATE_GEMINI_MODEL_ID : GEMINI_MODEL_ID;
+                // ストリーミング生成
+                let generated = '';
+                const stream = await ai.models.generateContentStream({ model, contents: [promptInput], config: generationConfig });
+                for await (const chunk of stream) {
+                    if (chunk.text) generated += chunk.text;
+                }
+                const digest = generated || '要約に失敗しました';
+                // 2000文字制限対応
+                const MAX_LEN = 2000;
+                const prefix = '📝 **要約侍による週次ダイジェスト**\n';
+                for (let i = 0; i < digest.length; i += MAX_LEN) {
+                    await channel.send(prefix + digest.slice(i, i + MAX_LEN));
+                }
 
                 // メモリ上のログをクリア
                 MESSAGE_LOG.set(guildId, []);

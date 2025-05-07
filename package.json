@@ -1,7 +1,7 @@
 {
   "dependencies": {
     "@google-cloud/aiplatform": "^1.19.0",
-    "@google/genai": "^0.6.0",
+    "@google/genai": "^1.0.0",
     "@sentry/node": "^9.13.0",
     "axios": "^1.8.4",
     "discord.js": "^14.18.0",
@@ -10,7 +10,8 @@
     "ts-node": "^10.9.2"
   },
   "scripts": {
-    "build": "tsc -p tsconfig.json",
+    "clean": "rimraf build",
+    "build": "npm run clean && tsc -p tsconfig.json",
     "watch": "tsc -p tsconfig.json -w",
     "dev": "ts-node index.ts",
     "start": "set GOOGLE_APPLICATION_CREDENTIALS=data\\aerobic-rampart-449222-s6-4b1bbf72e653.json && npm run build && node build/js/index.js",

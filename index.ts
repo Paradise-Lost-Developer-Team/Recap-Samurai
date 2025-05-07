@@ -23,7 +23,7 @@ const CONFIG = JSON.parse(fs.readFileSync(CONFIG_PATH, 'utf8'));
 const { TOKEN, GEMINI_SERVICE_ACCOUNT_PATH } = CONFIG;
 // Google Application Default Credentials が読めるようにServiceAccountファイルパスを環境変数に設定
 if (GEMINI_SERVICE_ACCOUNT_PATH) {
-  process.env.GOOGLE_APPLICATION_CREDENTIALS = path.join(DATA_DIR, GEMINI_SERVICE_ACCOUNT_PATH);
+    process.env.GOOGLE_APPLICATION_CREDENTIALS = path.join(DATA_DIR, GEMINI_SERVICE_ACCOUNT_PATH);
 }
 
 export interface ExtendedClient extends Client {
