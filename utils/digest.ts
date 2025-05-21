@@ -11,7 +11,7 @@ const dataDir = path.resolve(process.cwd(), 'data');
 const configPath = path.join(dataDir, 'config.json');
     
 // config読み込み (Gemini 設定)
-const { GEMINI_API_KEY, GEMINI_MODEL_ID, ALTERNATE_GEMINI_MODEL_ID, ALTERNATE_MODEL_UNTIL } = JSON.parse(
+const { GEMINI_API_KEY, GEMINI_MODEL_ID, ALTERNATE_GEMINI_MODEL_ID } = JSON.parse(
     fs.readFileSync(configPath, 'utf-8')
 );
 // GoogleGenAI クライアント初期化
@@ -74,8 +74,7 @@ export function setupDigestBot(client: ExtendedClient) {
                 ] as SafetySetting[],
             };
             // モデル選択
-            const isAlternate = new Date() < new Date(ALTERNATE_MODEL_UNTIL);
-            const model = isAlternate ? ALTERNATE_GEMINI_MODEL_ID : GEMINI_MODEL_ID;
+            const model = ALTERNATE_GEMINI_MODEL_ID;
             // ストリーミング生成
             let generated = '';
             const stream = await ai.models.generateContentStream({ model, contents: [promptInput], config: generationConfig });

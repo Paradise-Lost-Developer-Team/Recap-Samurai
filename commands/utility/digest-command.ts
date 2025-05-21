@@ -11,7 +11,7 @@ import { MESSAGE_LOG } from '../../utils/digest';
 
 const configPath = path.resolve(process.cwd(), 'data', 'config.json');
 // config読み込み (Gemini設定)
-const { GEMINI_API_KEY, GEMINI_MODEL_ID, ALTERNATE_GEMINI_MODEL_ID, ALTERNATE_MODEL_UNTIL } = JSON.parse(
+const { GEMINI_API_KEY, ALTERNATE_GEMINI_MODEL_ID } = JSON.parse(
     fs.readFileSync(configPath, 'utf-8')
 );
 // GoogleGenAI クライアント初期化
@@ -80,8 +80,7 @@ export async function execute(interaction: ChatInputCommandInteraction) {
         const promptInput = `${promptTemplate}\n
 ${summaryText}`;
         // GoogleGenAI でストリーミング要約生成
-        const isAlternate = new Date() < new Date(ALTERNATE_MODEL_UNTIL);
-        const model = isAlternate ? ALTERNATE_GEMINI_MODEL_ID : GEMINI_MODEL_ID;
+        const model = ALTERNATE_GEMINI_MODEL_ID;
         const generationConfig = {
             maxOutputTokens: 8192,
             temperature: 1,
