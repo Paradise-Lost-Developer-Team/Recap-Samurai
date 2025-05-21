@@ -6,7 +6,9 @@
     "axios": "^1.8.4",
     "discord.js": "^14.18.0",
     "google-auth-library": "^9.15.1",
+    "jspdf": "^3.0.1",
     "node-cron": "^3.0.3",
+    "papaparse": "^5.5.3",
     "ts-node": "^10.9.2"
   },
   "scripts": {
@@ -23,6 +25,7 @@
   },
   "devDependencies": {
     "@types/node-cron": "^3.0.11",
+    "@types/papaparse": "^5.3.16",
     "typescript": "^5.8.3"
   }
 }
