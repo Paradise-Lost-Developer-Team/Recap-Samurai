@@ -11,6 +11,7 @@ import Papa from 'papaparse';
         
 const dataDir = path.resolve(process.cwd(), 'data');
 const configPath = path.join(dataDir, 'config.json');
+const LOGS_DIR = path.resolve(process.cwd(), 'data', 'logs');
     
 // config読み込み (Gemini 設定)
 const { GEMINI_API_KEY, GEMINI_MODEL_ID, ALTERNATE_GEMINI_MODEL_ID } = JSON.parse(
@@ -28,6 +29,25 @@ export const MESSAGE_LOG = new Map<string, { content: string; author: string; ti
 
 let globalDigestClient: ExtendedClient | null = null;
 
+if (!fs.existsSync(LOGS_DIR)) {
+    fs.mkdirSync(LOGS_DIR, { recursive: true });
+}
+
+function saveGuildLog(guildId: string) {
+    const log = MESSAGE_LOG.get(guildId) || [];
+    fs.writeFileSync(path.join(LOGS_DIR, `${guildId}.json`), JSON.stringify(log, null, 2), 'utf-8');
+}
+
+function loadGuildLog(guildId: string) {
+    const file = path.join(LOGS_DIR, `${guildId}.json`);
+    if (fs.existsSync(file)) {
+        try {
+            const arr = JSON.parse(fs.readFileSync(file, 'utf-8'));
+            if (Array.isArray(arr)) MESSAGE_LOG.set(guildId, arr);
+        } catch {}
+    }
+}
+
 export function setupDigestBot(client: ExtendedClient) {
     globalDigestClient = client;
 
@@ -44,10 +64,18 @@ export function setupDigestBot(client: ExtendedClient) {
             timestamp: message.createdTimestamp,
         });
         MESSAGE_LOG.set(guildId, log);
+        saveGuildLog(guildId);
 
         if (KEYWORDS.some((kw) => message.content.includes(kw))) {
             const hit = KEYWORDS.find((kw) => message.content.includes(kw));
             await message.reply(`⚠️ キーワード「${hit}」が検出されました。`);
+        }
+    });
+
+    // Bot起動時に全ギルドのログを復元
+    client.on('ready', async () => {
+        for (const guild of client.guilds.cache.values()) {
+            loadGuildLog(guild.id);
         }
     });
 
