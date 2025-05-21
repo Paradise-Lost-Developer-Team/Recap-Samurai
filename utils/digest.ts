@@ -11,15 +11,12 @@ const dataDir = path.resolve(process.cwd(), 'data');
 const configPath = path.join(dataDir, 'config.json');
     
 // config読み込み (Gemini 設定)
-const { GEMINI_API_KEY, GEMINI_PROJECT_ID, GEMINI_LOCATION, GEMINI_MODEL_ID, ALTERNATE_GEMINI_MODEL_ID, ALTERNATE_MODEL_UNTIL } = JSON.parse(
+const { GEMINI_API_KEY, GEMINI_MODEL_ID, ALTERNATE_GEMINI_MODEL_ID, ALTERNATE_MODEL_UNTIL } = JSON.parse(
     fs.readFileSync(configPath, 'utf-8')
 );
 // GoogleGenAI クライアント初期化
 const ai = new GoogleGenAI({
-    vertexai: true,
-    project: GEMINI_PROJECT_ID,
-    location: GEMINI_LOCATION,
-    apiKey: GEMINI_API_KEY,
+    apiKey: GEMINI_API_KEY
 });
 // prompt テンプレート読み込み
 const promptTemplate = fs.readFileSync(path.resolve(process.cwd(), 'utils', 'prompt_digest.txt'), 'utf-8');

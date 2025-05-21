@@ -11,15 +11,12 @@ import { MESSAGE_LOG } from '../../utils/digest';
 
 const configPath = path.resolve(process.cwd(), 'data', 'config.json');
 // config読み込み (Gemini設定)
-const { GEMINI_SERVICE_ACCOUNT_PATH, GEMINI_PROJECT_ID, GEMINI_LOCATION, GEMINI_MODEL_ID, ALTERNATE_GEMINI_MODEL_ID, ALTERNATE_MODEL_UNTIL } = JSON.parse(
+const { GEMINI_API_KEY, GEMINI_MODEL_ID, ALTERNATE_GEMINI_MODEL_ID, ALTERNATE_MODEL_UNTIL } = JSON.parse(
     fs.readFileSync(configPath, 'utf-8')
 );
 // GoogleGenAI クライアント初期化
-const dataDir = path.resolve(process.cwd(), 'data');
 const ai = new GoogleGenAI({
-    vertexai: true,
-    project: GEMINI_PROJECT_ID,
-    location: GEMINI_LOCATION
+    apiKey: GEMINI_API_KEY
 });
 
 // promptテンプレート読み込み
