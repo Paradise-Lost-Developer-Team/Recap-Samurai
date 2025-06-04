@@ -77,6 +77,10 @@ export function setupDigestBot(client: ExtendedClient) {
         for (const guild of client.guilds.cache.values()) {
             loadGuildLog(guild.id);
         }
+        // 起動直後にA4ダイジェストを即時送信（5時再起動対策）
+        await generateA4Summary('24h', client);
+        await generateA4Summary('week', client);
+        await generateA4Summary('month', client);
     });
 
     // configからcron式とチャンネルIDを取得
