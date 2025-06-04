@@ -34,7 +34,8 @@ if (!fs.existsSync(LOGS_DIR)) {
 }
 
 function saveGuildLog(guildId: string) {
-    const log = MESSAGE_LOG.get(guildId) || [];
+    let log = MESSAGE_LOG.get(guildId);
+    if (!Array.isArray(log)) log = [];
     fs.writeFileSync(path.join(LOGS_DIR, `${guildId}.json`), JSON.stringify(log, null, 2), 'utf-8');
 }
 
@@ -43,8 +44,16 @@ function loadGuildLog(guildId: string) {
     if (fs.existsSync(file)) {
         try {
             const arr = JSON.parse(fs.readFileSync(file, 'utf-8'));
-            if (Array.isArray(arr)) MESSAGE_LOG.set(guildId, arr);
-        } catch {}
+            if (Array.isArray(arr)) {
+                MESSAGE_LOG.set(guildId, arr);
+            } else {
+                MESSAGE_LOG.set(guildId, []);
+            }
+        } catch {
+            MESSAGE_LOG.set(guildId, []);
+        }
+    } else {
+        MESSAGE_LOG.set(guildId, []);
     }
 }
 
@@ -56,7 +65,8 @@ export function setupDigestBot(client: ExtendedClient) {
     client.on('messageCreate', async (message) => {
         if (message.author.bot) return;
         const guildId = message.guildId!;
-        const log = MESSAGE_LOG.get(guildId) || [];
+        let log = MESSAGE_LOG.get(guildId);
+        if (!Array.isArray(log)) log = [];
         log.push({
             content: message.content,
             author: message.author.tag,
@@ -94,7 +104,7 @@ export function setupDigestBot(client: ExtendedClient) {
 
     cron.schedule(digestCron, async () => {
         for (const [guildId, messages] of MESSAGE_LOG.entries()) {
-            if (messages.length === 0) continue;
+            if (!Array.isArray(messages) || messages.length === 0) continue;
             const guild = await client.guilds.fetch(guildId);
             let channel = null;
             if (digestChannelId) {
@@ -219,7 +229,7 @@ export function setupDigestBot(client: ExtendedClient) {
 
     async function generateA4Summary(period: '24h' | 'week' | 'month', client: ExtendedClient) {
         for (const [guildId, messages] of MESSAGE_LOG.entries()) {
-            if (messages.length === 0) continue;
+            if (!Array.isArray(messages) || messages.length === 0) continue;
             const guild = await client.guilds.fetch(guildId);
             let channel = null;
             if (digestChannelId) {
@@ -297,6 +307,11 @@ export function setupDigestBot(client: ExtendedClient) {
         const now = Date.now();
         for (const [guildId, messages] of MESSAGE_LOG.entries()) {
             if (isPremiumUser(guildId)) continue; // 有料は無制限
+            if (!Array.isArray(messages)) {
+                MESSAGE_LOG.set(guildId, []);
+                saveGuildLog(guildId);
+                continue;
+            }
             // 無料は30日超過分を削除
             const THIRTY_DAYS = 30 * 24 * 60 * 60 * 1000;
             const filtered = messages.filter(m => typeof m !== 'string' && m.timestamp > now - THIRTY_DAYS);
