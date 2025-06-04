@@ -55,7 +55,6 @@ export function setupDigestBot(client: ExtendedClient) {
 
     client.on('messageCreate', async (message) => {
         if (message.author.bot) return;
-
         const guildId = message.guildId!;
         const log = MESSAGE_LOG.get(guildId) || [];
         log.push({
@@ -65,7 +64,6 @@ export function setupDigestBot(client: ExtendedClient) {
         });
         MESSAGE_LOG.set(guildId, log);
         saveGuildLog(guildId);
-
         if (KEYWORDS.some((kw) => message.content.includes(kw))) {
             const hit = KEYWORDS.find((kw) => message.content.includes(kw));
             await message.reply(`⚠️ キーワード「${hit}」が検出されました。`);
@@ -195,6 +193,7 @@ export function setupDigestBot(client: ExtendedClient) {
                 await channel.send(prefix + digest.slice(i, i + MAX_LEN));
             }
             MESSAGE_LOG.set(guildId, []);
+            saveGuildLog(guildId);
         }
     }, {
         timezone: 'Asia/Tokyo',
@@ -302,6 +301,7 @@ export function setupDigestBot(client: ExtendedClient) {
             const THIRTY_DAYS = 30 * 24 * 60 * 60 * 1000;
             const filtered = messages.filter(m => typeof m !== 'string' && m.timestamp > now - THIRTY_DAYS);
             MESSAGE_LOG.set(guildId, filtered);
+            saveGuildLog(guildId);
         }
     }
     // 1日1回アーカイブ実行
