@@ -25,7 +25,6 @@ const { TOKEN, GEMINI_SERVICE_ACCOUNT_PATH } = CONFIG;
 if (GEMINI_SERVICE_ACCOUNT_PATH) {
     process.env.GOOGLE_APPLICATION_CREDENTIALS = path.join(DATA_DIR, GEMINI_SERVICE_ACCOUNT_PATH);
 }
-
 export interface ExtendedClient extends Client {
     commands: Collection<string, any>;
 }
